@@ -47,6 +47,7 @@ import urllib
 import urllib2      # used for image upload
 import urlparse
 
+
 # use relative import for versions >=2.5 and package import for python versions <2.5 
 if (sys.version_info[0] > 2) or (sys.version_info[0] == 2 and sys.version_info[1] >= 5):
     from .lib.httplib2 import Http, ProxyInfo, socks
@@ -224,7 +225,8 @@ class Shotgun(object):
                  convert_datetimes_to_utc=True,
                  http_proxy=None,
                  ensure_ascii=True,
-                 connect=True):
+                 connect=True,
+                 user_auth=False):
         """Initialises a new instance of the Shotgun client.
         
         :param base_url: http or https url to the shotgun server.
@@ -247,8 +249,16 @@ class Shotgun(object):
         :param connect: If True, connect to the server. Only used for testing.
         """
         self.config = _Config()
-        self.config.api_key = api_key
-        self.config.script_name = script_name
+        self.config.user_auth = user_auth
+        # This enables a human user's login name + password to be used instead of a script + key for authentication
+        if user_auth:
+            self.config.api_key = api_key
+            self.config.script_name = script_name
+            self.config.user_password = api_key
+            self.config.user_login = script_name
+        else:
+            self.config.api_key = api_key
+            self.config.script_name = script_name
         self.config.convert_datetimes_to_utc = convert_datetimes_to_utc
         self.config.no_ssl_validation = NO_SSL_VALIDATION
         self._connection = None
